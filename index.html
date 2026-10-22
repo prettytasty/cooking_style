@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Toilet Stories</title>
+<meta name="description" content="Toilet Stories: pick the right stall, dodge the cops, and learn how gambling odds work with play money.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1424;--panel:#2a2038;--ink:#f3e9c6;--dim:#a99bc0;--gold:#ffc83d;--red:#ff4b3e;--green:#4ee08a;--blue:#3ea6ff;--door:#c9743a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{color-scheme:dark;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'VT323',monospace;font-size:22px;line-height:1.25;min-height:100vh;
+background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 4px)}
+h1,h2,h3,.px{font-family:'Press Start 2P','Courier New',monospace;font-weight:400;line-height:1.5}
+h1{font-size:clamp(18px,4.5vw,32px);margin:0;color:var(--gold);text-shadow:3px 3px 0 var(--red)}
+h2{font-size:14px;margin:0 0 12px;color:var(--gold)}
+header{padding:16px 16px 8px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;max-width:900px;margin:0 auto}
+.wallet{border:4px solid var(--ink);background:var(--panel);padding:8px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.wallet b{font-family:'Press Start 2P',monospace;font-weight:400;font-size:14px;color:var(--green)}
+input{font:inherit;font-size:22px;background:#0f0a18;color:var(--ink);border:3px solid var(--dim);padding:4px 8px;width:130px}
+input:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button{font-family:'Press Start 2P','Courier New',monospace;font-size:11px;color:#1a1424;background:var(--gold);border:0;padding:10px 12px;cursor:pointer;box-shadow:0 4px 0 #8a5d00;margin-bottom:4px}
+button:active{transform:translateY(3px);box-shadow:0 1px 0 #8a5d00}
+button:disabled{background:#6c6280;box-shadow:0 4px 0 #3d3550;cursor:not-allowed}
+nav{max-width:900px;margin:8px auto 0;padding:0 16px;display:flex;flex-wrap:wrap;gap:8px}
+nav button{background:var(--panel);color:var(--ink);box-shadow:0 4px 0 #0f0a18;border:3px solid var(--dim)}
+nav button[aria-current="true"]{background:var(--gold);color:#1a1424;border-color:var(--gold)}
+main{max-width:900px;margin:12px auto 140px;padding:0 16px}
+section{display:none;border:4px solid var(--ink);background:var(--panel);padding:18px}
+section.on{display:block}
+.msg{min-height:56px;font-size:26px;margin:10px 0}
+.win{color:var(--green)}.lose{color:var(--red)}
+.bet{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.stalls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+.stall{height:230px;background:var(--door);border:4px solid #1a1424;outline:4px solid var(--ink);position:relative;color:#1a1424;
+display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:0 0 14px;cursor:pointer;font-size:22px;box-shadow:inset 0 -60px 0 rgba(0,0,0,.12)}
+.stall::before{content:"";position:absolute;left:12%;right:12%;top:14px;height:70px;background:repeating-linear-gradient(0deg,#1a1424 0 6px,transparent 6px 14px);opacity:.55}
+.stall .n{font-family:'Press Start 2P',monospace;font-size:34px;margin-bottom:8px;position:relative}
+.stall .tag{font-size:20px;position:relative;min-height:24px}
+.stall:hover:not(:disabled){filter:brightness(1.15)}
+.stall.safe{background:#3aa86a}.stall.bad{background:#7b2430;color:var(--ink)}
+.stall:disabled{box-shadow:inset 0 -60px 0 rgba(0,0,0,.12)}
+#chase{display:none;border:4px solid var(--red);background:#10091a;padding:14px;margin-top:10px}
+#chase.on{display:block;animation:flash .5s steps(2) infinite}
+@keyframes flash{50%{border-color:var(--blue)}}
+.track{position:relative;height:56px;background:#2d2540;border-bottom:6px solid var(--dim);margin:12px 0;overflow:hidden}
+.track span{position:absolute;bottom:0;font-family:'Press Start 2P',monospace;font-size:12px;padding:8px 6px}
+#runner{background:var(--green);color:#1a1424}#cop{background:var(--red);color:#fff}
+#exit{right:0;background:var(--gold);color:#1a1424}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.stats div{border:3px solid var(--dim);padding:8px}
+.stats b{display:block;font-family:'Press Start 2P',monospace;font-weight:400;font-size:13px;margin-top:4px}
+p{margin:8px 0;max-width:62ch}
+.credit{color:var(--dim)}
+#sig{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:max(8px,env(safe-area-inset-bottom,0px));text-align:right;pointer-events:none;z-index:5}
+#sig img{width:100%;display:block;mix-blend-mode:screen}
+#sig span{font-size:22px;color:var(--dim);background:var(--bg);padding:0 6px}
+@media(max-width:560px){.stall{height:170px}.stall .n{font-size:24px}}
+@media(prefers-reduced-motion:reduce){#chase.on{animation:none}}
+</style>
+</head>
+<body>
+<noscript><p style="padding:16px">Toilet Stories needs JavaScript to run.</p></noscript>
+<header>
+  <h1>TOILET STORIES</h1>
+  <div class="wallet">
+    <span>Cash <b id="cash">$0</b></span>
+    <input id="code" placeholder="promo code" autocomplete="off" aria-label="Promo code">
+    <button id="redeem">Redeem</button>
+  </div>
+</header>
+<nav id="menu" aria-label="Menu">
+  <button data-t="play" aria-current="true">Play</button>
+  <button data-t="learn">Odds lab</button>
+  <button data-t="sarina">Sarina’s idea</button>
+</nav>
+<main>
+  <section id="play" class="on">
+    <h2>Pick a stall</h2>
+    <p>One stall is empty and safe. The other two have the cops waiting. Pick right and your bet pays 2.5x.</p>
+    <div class="bet">
+      <span>Bet:</span>
+      <button data-b="10">$10</button><button data-b="50">$50</button><button data-b="100">$100</button><button data-b="500">$500</button>
+      <span>Now: <b class="px" id="betv" style="font-size:12px">$50</b></span>
+    </div>
+    <div class="stalls" id="stalls">
+      
+    </div>
+    <div class="msg" id="msg" role="status" aria-live="polite">Redeem a promo code, then pick a stall.</div>
+    <div id="chase">
+      <h2 style="color:var(--red)">Police! Run!</h2>
+      <p>Tap RUN (or press space) to reach the exit before the cop catches you.</p>
+      <div class="track"><span id="runner">YOU</span><span id="cop">COP</span><span id="exit">EXIT</span></div>
+      <button id="run">RUN!</button>
+    </div>
+  </section>
+
+  <section id="learn">
+    <h2>Odds lab</h2>
+    <p>for school no gamble fake gamble please no ban</p>
+    <div class="stats">
+      <div>Rounds<b id="s-n">0</b></div>
+      <div>Wins<b id="s-w">0</b></div>
+      <div>Win rate<b id="s-r">0%</b></div>
+      <div>Net result<b id="s-net">$0</b></div>
+    </div>
+    <p><button id="reset">Reset progress</button></p>
+    </section>
+
+  <section id="sarina">
+    <h2>Sarina’s idea game</h2>
+    <p>The idea: a toilet game where you pick a stall, and the wrong one brings the police.</p>
+    <p class="credit">Idea by Sarina. Made by Toy.</p>
+    <button data-go="play">Play it</button>
+  </section>
+</main>
+
+<div id="sig"><span>Made by Tony Nguyen</span></div>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var st={cash:0,used:false,n:0,w:0,net:0},bet=50,busy=false;
+try{var sv=JSON.parse(localStorage.getItem('stallroulette')||'null');if(sv)st=sv}catch(e){}
+function save(){try{localStorage.setItem('stallroulette',JSON.stringify(st))}catch(e){}}
+function money(n){return(n<0?'-$':'$')+Math.abs(n).toLocaleString()}
+function paint(){
+  $('cash').textContent=money(st.cash);$('betv').textContent=money(bet);
+  $('s-n').textContent=st.n;$('s-w').textContent=st.w;
+  $('s-r').textContent=(st.n?Math.round(st.w/st.n*100):0)+'%';$('s-net').textContent=money(st.net);
+  $('s-net').className=st.net<0?'lose':st.net>0?'win':'';
+}
+function say(t,c){var m=$('msg');m.textContent=t;m.className='msg '+(c||'')}
+var ac;function beep(f,d,ty){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();
+o.type=ty||'square';o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+
+/* menu */
+function show(t){
+  document.querySelectorAll('section').forEach(function(s){s.classList.toggle('on',s.id===t)});
+  document.querySelectorAll('#menu button').forEach(function(b){b.setAttribute('aria-current',b.dataset.t===t)});
+}
+document.querySelectorAll('#menu button').forEach(function(b){b.onclick=function(){show(b.dataset.t)}});
+document.querySelector('[data-go]').onclick=function(){show('play')};
+
+/* promo */
+var CODES={tony:1000,sarina:40,larissa:999};
+if(st.used===true)st.used={tony:true};
+if(!st.used||typeof st.used!=='object')st.used={};
+$('redeem').onclick=function(){
+  var c=$('code').value.trim().toLowerCase();
+  if(CODES.hasOwnProperty(c)){
+    if(st.used[c]){say('That code was already used.','lose')}
+    else{st.used[c]=true;st.cash+=CODES[c];save();paint();beep(880,.15);say('Promo accepted. +'+money(CODES[c]),'win')}
+  }else say('Unknown code. Try again.','lose');
+  $('code').value='';
+};
+$('code').onkeydown=function(e){if(e.key==='Enter')$('redeem').click()};
+
+/* bets */
+document.querySelectorAll('[data-b]').forEach(function(b){b.onclick=function(){bet=+b.dataset.b;paint()}});
+
+/* stalls */
+var box=$('stalls');box.innerHTML='';
+for(var i=1;i<=3;i++){
+  var d=document.createElement('button');d.className='stall';d.dataset.s=i;
+  d.innerHTML='<span class="n">'+i+'</span><span class="tag"></span>';box.appendChild(d);
+}
+var stalls=box.querySelectorAll('.stall');
+function reset(){stalls.forEach(function(s){s.className='stall';s.disabled=false;s.querySelector('.tag').textContent=''})}
+stalls.forEach(function(s){s.onclick=function(){pick(+s.dataset.s)}});
+
+function pick(n){
+  if(busy)return;
+  if(st.cash<bet){say('Not enough cash. Redeem the promo code or lower your bet.','lose');return}
+  busy=true;stalls.forEach(function(s){s.disabled=true});
+  var safe=1+Math.floor(Math.random()*3);
+  st.cash-=bet;st.n++;
+  stalls.forEach(function(s,i){var ok=i+1===safe;s.classList.add(ok?'safe':'bad');s.querySelector('.tag').textContent=ok?'EMPTY':'COPS'});
+  if(n===safe){
+    var win=Math.round(bet*2.5);st.cash+=win;st.w++;st.net+=win-bet;save();paint();
+    beep(660,.12);setTimeout(function(){beep(990,.2)},130);
+    say('Safe! Stall '+n+' was clear. You win '+money(win)+'.','win');busy=false;
+    setTimeout(reset,1600);
+  }else{
+    st.net-=bet;save();paint();say('Stall '+n+' had the cops. You lose '+money(bet)+'.','lose');
+    setTimeout(chase,900);
+  }
+}
+
+/* chase */
+var iv,pos,cop,tick=0,run=$('run');
+function chase(){
+  reset();pos=0;cop=-25;$('chase').className='on';mv();
+  clearInterval(iv);
+  iv=setInterval(function(){
+    cop+=1.2;if(tick++%3===0)beep(tick%2?700:520,.12,'sawtooth');mv();
+    if(cop>=pos)end(false);
+  },100);
+}
+function mv(){
+  $('runner').style.left=Math.max(0,pos)*0.88+'%';
+  $('cop').style.left=Math.max(-12,cop)*0.88+'%';
+  $('cop').style.display=cop<-10?'none':'block';
+}
+function step(){
+  if(!$('chase').classList.contains('on'))return;
+  pos+=5;mv();if(pos>=100)end(true);
+}
+function end(ok){
+  clearInterval(iv);$('chase').className='';busy=false;
+  if(ok){say('You got away! The cops lost you.','win')}
+  else{st.cash=Math.max(0,st.cash-50);st.net-=50;say('Busted. Fine: $50.','lose')}
+  save();paint();
+}
+run.onpointerdown=function(e){e.preventDefault();step()};
+document.addEventListener('keydown',function(e){if(e.code==='Space'&&!e.repeat&&$('chase').classList.contains('on')){e.preventDefault();step()}});
+$('reset').onclick=function(){if(confirm('Reset your cash, promo codes and stats?')){st={cash:0,used:{},n:0,w:0,net:0};save();paint();say('Progress reset. Redeem a promo code to start again.')}};
+paint();
+})();
+</script>
+</body>
+</html>
